@@ -107,6 +107,7 @@ def main(argv):
 
     track_files = [f for f in argv if is_gpx(f)]
     points = get_all_points(track_files)
+    points = filter(lambda x: x.time is not None, points)
     sorted_points = sorted(points, key=lambda p: p.time)
     xml = to_xml(sorted_points)
 
