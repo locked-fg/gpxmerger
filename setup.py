@@ -6,6 +6,5 @@ setup(
    description='merges gpx tracks',
    author='Franz',
    author_email='code@locked.de',
-   packages=['gpxmerge'],
    install_requires=['gpxpy']
 )
