@@ -6,6 +6,8 @@ import gpxpy
 import gpxpy.parser as parser
 from os import path
 
+nsmap = {}
+
 # https://fangpenlin.com/posts/2012/08/26/good-logging-practice-in-python/
 logging.basicConfig(level=logging.DEBUG)
 logging.config.dictConfig({
@@ -56,6 +58,7 @@ def load_tracks(track_files):
             gpx_parser.parse()
             gpx = gpx_parser.gpx
             tracks.extend(gpx.tracks)
+            nsmap.update(gpx.nsmap)
 
     logger.debug('loaded a total of {s} tracks'.format(s=len(tracks)))
     return tracks
@@ -82,6 +85,7 @@ def load_points(track_files):
 def to_xml(data, name=""):
     logger = logging.getLogger(__name__)
     gpx = gpxpy.gpx.GPX()
+    gpx.nsmap.update(nsmap)
     
     if isinstance(data[0], gpxpy.gpx.GPXTrack):
         logger.debug('converting {s} tracks to XML'.format(s=len(data)))
