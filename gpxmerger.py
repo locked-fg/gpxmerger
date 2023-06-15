@@ -37,8 +37,6 @@ logging.config.dictConfig({
     }
 })
 
-target_filename = 'merged.gpx'
-
 
 def is_gpx(filename):
     logger = logging.getLogger(__name__)
@@ -92,11 +90,24 @@ def get_all_points(track_files):
     return points
 
 
-def get_target(files):
+def get_target(files, target=None):
     logger = logging.getLogger(__name__)
-    file = files[0]
-    dir_name = path.dirname(file)
-    target = path.join(dir_name, target_filename)
+
+    if not target or not path.isfile(target):
+        filename = "merged"
+        dirname = path.dirname(files[0])
+
+        if target and path.isdir(target):
+            dirname = target
+
+        elif target:
+            filename = target
+
+        target = path.join(dirname, filename)
+
+    if not target.endswith(".gpx"):
+        target += ".gpx"
+
     logger.debug("write result to: {f}".format(f=target))
     return target
 
@@ -109,7 +120,7 @@ def save_target(xml, target_file):
         logger.debug('done saving')
 
 
-def merge(files):
+def merge(files, target=None):
     logger = logging.getLogger(__name__)
     logger.info("start new merge process")
 
@@ -119,7 +130,7 @@ def merge(files):
     sorted_points = sorted(points, key=lambda p: p.time)
     xml = to_xml(sorted_points)
 
-    target_file = get_target(files)
+    target_file = get_target(files, target)
     save_target(xml, target_file)
 
     logger.info("Finish")
@@ -128,13 +139,14 @@ def merge(files):
 def main():
     parser = argparse.ArgumentParser(description="A simple script to merge multiple GPX files into one large GPX file.")
     parser.add_argument("input_files", nargs="*", help="Input files to merge")
+    parser.add_argument("-o", help="Output file name, path or directory")
 
     if len(sys.argv[1:]) == 0:
         parser.print_help()
         parser.exit()
 
     args = parser.parse_args()
-    merge(args.input_files)
+    merge(args.input_files, args.o)
 
 
 if __name__ == '__main__':
