@@ -64,11 +64,7 @@ def load_tracks(track_files):
 def load_segments(track_files):
     logger = logging.getLogger(__name__)
     tracks = load_tracks(track_files)
-    segments = []
-
-    for track in tracks:
-        segments.extend(track.segments)
-
+    segments = sum((track.segments for track in tracks), [])
     logger.debug('loaded a total of {s} segments'.format(s=len(segments)))
     return segments
 
@@ -76,11 +72,7 @@ def load_segments(track_files):
 def load_points(track_files):
     logger = logging.getLogger(__name__)
     segments = load_segments(track_files)
-    points = []
-
-    for segment in segments:
-        points.extend(segment.points)
-
+    points = sum((segment.points for segment in segments), [])
     points = list(filter(lambda x: x.time is not None, points))
     points = sorted(points, key=lambda p: p.time)
     logger.debug('loaded a total of {s} points'.format(s=len(points)))
