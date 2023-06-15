@@ -3,7 +3,6 @@ import logging
 import logging.config
 import gpxpy
 import gpxpy.parser as parser
-from gpxpy.gpx import GPXTrackPoint
 from os import path
 
 # https://fangpenlin.com/posts/2012/08/26/good-logging-practice-in-python/
