@@ -1,3 +1,4 @@
+import argparse
 import sys
 import logging
 import logging.config
@@ -120,7 +121,15 @@ def merge(files):
 
 
 def main():
-    merge(sys.argv[1:])
+    parser = argparse.ArgumentParser(description="A simple script to merge multiple GPX files into one large GPX file.")
+    parser.add_argument("input_files", nargs="*", help="Input files to merge")
+
+    if len(sys.argv[1:]) == 0:
+        parser.print_help()
+        parser.exit()
+
+    args = parser.parse_args()
+    merge(args.input_files)
 
 
 if __name__ == '__main__':
