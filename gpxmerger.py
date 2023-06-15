@@ -101,6 +101,14 @@ def get_target(files):
     return target
 
 
+def save_target(xml, target_file):
+    logger = logging.getLogger(__name__)
+    with open(target_file, 'w') as fp:
+        logger.debug('saving "{f}"'.format(f=target_file))
+        fp.write(xml)
+        logger.debug('done saving')
+
+
 def merge(files):
     logger = logging.getLogger(__name__)
     logger.info("start new merge process")
@@ -112,10 +120,7 @@ def merge(files):
     xml = to_xml(sorted_points)
 
     target_file = get_target(files)
-    with open(target_file, 'w') as fp:
-        logger.debug('saving "{f}"'.format(f=target_file))
-        fp.write(xml)
-        logger.debug('done saving')
+    save_target(xml, target_file)
 
     logger.info("Finish")
 
