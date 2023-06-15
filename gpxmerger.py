@@ -104,7 +104,7 @@ def main(argv):
     logger = logging.getLogger(__name__)
     logger.info("start new merge process")
 
-    track_files = [f for f in argv if is_gpx(f)]
+    track_files = filter(is_gpx, argv)
     points = get_all_points(track_files)
     points = filter(lambda x: x.time is not None, points)
     sorted_points = sorted(points, key=lambda p: p.time)
