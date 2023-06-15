@@ -86,6 +86,8 @@ def get_all_points(track_files):
     for f in track_files:
         points.extend(load_points(f))
 
+    points = filter(lambda x: x.time is not None, points)
+    points = sorted(points, key=lambda p: p.time)
     logger.debug('loaded a total of {s} points'.format(s=len(points)))
     return points
 
@@ -126,9 +128,7 @@ def merge(files, target=None):
 
     track_files = filter(is_gpx, files)
     points = get_all_points(track_files)
-    points = filter(lambda x: x.time is not None, points)
-    sorted_points = sorted(points, key=lambda p: p.time)
-    xml = to_xml(sorted_points)
+    xml = to_xml(points)
 
     target_file = get_target(files, target)
     save_target(xml, target_file)
