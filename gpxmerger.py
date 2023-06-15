@@ -79,7 +79,7 @@ def load_points(track_files):
     return points
 
 
-def to_xml(data):
+def to_xml(data, name=""):
     logger = logging.getLogger(__name__)
     gpx = gpxpy.gpx.GPX()
     
@@ -89,7 +89,7 @@ def to_xml(data):
         
     else:
         # Create first track in our GPX:
-        gpx_track = gpxpy.gpx.GPXTrack()
+        gpx_track = gpxpy.gpx.GPXTrack(name)
         gpx.tracks.append(gpx_track)
         
         if isinstance(data[0], gpxpy.gpx.GPXTrackSegment):
@@ -131,6 +131,10 @@ def get_target(files, target=None):
     return target
 
 
+def get_name(target):
+    return path.splitext(path.basename(target))[0]
+
+
 def save_target(xml, target_file):
     logger = logging.getLogger(__name__)
     with open(target_file, 'w') as fp:
@@ -153,8 +157,9 @@ def merge(files, target=None, segment=False, track=False):
     else:
         data = load_points(track_files)
 
-    xml = to_xml(data)
     target_file = get_target(files, target)
+    name = get_name(target_file)
+    xml = to_xml(data, name)
     save_target(xml, target_file)
     logger.info("Finish")
 
