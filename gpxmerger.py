@@ -100,17 +100,17 @@ def get_target(files):
     return target
 
 
-def main(argv):
+def merge(files):
     logger = logging.getLogger(__name__)
     logger.info("start new merge process")
 
-    track_files = filter(is_gpx, argv)
+    track_files = filter(is_gpx, files)
     points = get_all_points(track_files)
     points = filter(lambda x: x.time is not None, points)
     sorted_points = sorted(points, key=lambda p: p.time)
     xml = to_xml(sorted_points)
 
-    target_file = get_target(argv)
+    target_file = get_target(files)
     with open(target_file, 'w') as fp:
         logger.debug('saving "{f}"'.format(f=target_file))
         fp.write(xml)
@@ -119,5 +119,9 @@ def main(argv):
     logger.info("Finish")
 
 
+def main():
+    merge(sys.argv[1:])
+
+
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main()
