@@ -46,18 +46,23 @@ def is_gpx(filename):
     return ext == '.gpx'
 
 
-def load_points(filename):
+def load_points(track_files):
     logger = logging.getLogger(__name__)
     points = []
-    with open(filename, 'r') as gpx_file:
-        gpx_parser = parser.GPXParser(gpx_file)
-        gpx_parser.parse()
-        gpx = gpx_parser.gpx
-        for track in gpx.tracks:
-            for segment in track.segments:
-                points.extend(segment.points)
 
-    logger.debug('loaded {s} points from {f}'.format(s=len(points), f=filename))
+    for track_file in track_files:
+        with open(track_file, 'r') as gpx_file:
+            gpx_parser = parser.GPXParser(gpx_file)
+            gpx_parser.parse()
+            gpx = gpx_parser.gpx
+
+            for track in gpx.tracks:
+                for segment in track.segments:
+                    points.extend(segment.points)
+
+    points = list(filter(lambda x: x.time is not None, points))
+    points = sorted(points, key=lambda p: p.time)
+    logger.debug('loaded a total of {s} points'.format(s=len(points)))
     return points
 
 
@@ -78,18 +83,6 @@ def to_xml(points):
     gpx_segment.points.extend(points)
 
     return gpx.to_xml()
-
-
-def get_all_points(track_files):
-    logger = logging.getLogger(__name__)
-    points = []
-    for f in track_files:
-        points.extend(load_points(f))
-
-    points = filter(lambda x: x.time is not None, points)
-    points = sorted(points, key=lambda p: p.time)
-    logger.debug('loaded a total of {s} points'.format(s=len(points)))
-    return points
 
 
 def get_target(files, target=None):
@@ -127,7 +120,7 @@ def merge(files, target=None):
     logger.info("start new merge process")
 
     track_files = filter(is_gpx, files)
-    points = get_all_points(track_files)
+    points = load_points(track_files)
     xml = to_xml(points)
 
     target_file = get_target(files, target)
