@@ -46,18 +46,28 @@ def is_gpx(filename):
     return ext == '.gpx'
 
 
-def load_segments(track_files):
+def load_tracks(track_files):
     logger = logging.getLogger(__name__)
-    segments = []
+    tracks = []
 
     for track_file in track_files:
         with open(track_file, 'r') as gpx_file:
             gpx_parser = parser.GPXParser(gpx_file)
             gpx_parser.parse()
             gpx = gpx_parser.gpx
+            tracks.extend(gpx.tracks)
 
-            for track in gpx.tracks:
-                segments.extend(track.segments)
+    logger.debug('loaded a total of {s} tracks'.format(s=len(tracks)))
+    return tracks
+
+
+def load_segments(track_files):
+    logger = logging.getLogger(__name__)
+    tracks = load_tracks(track_files)
+    segments = []
+
+    for track in tracks:
+        segments.extend(track.segments)
 
     logger.debug('loaded a total of {s} segments'.format(s=len(segments)))
     return segments
@@ -81,25 +91,31 @@ def to_xml(data):
     logger = logging.getLogger(__name__)
     gpx = gpxpy.gpx.GPX()
     
-    # Create first track in our GPX:
-    gpx_track = gpxpy.gpx.GPXTrack()
-    gpx.tracks.append(gpx_track)
-    
-    if isinstance(data[0], gpxpy.gpx.GPXTrackSegment):
-        logger.debug('converting {s} segments to XML'.format(s=len(data)))
-        gpx_track.segments.extend(data)
+    if isinstance(data[0], gpxpy.gpx.GPXTrack):
+        logger.debug('converting {s} tracks to XML'.format(s=len(data)))
+        gpx.tracks.extend(data)
         
     else:
-        # Create first segment in our GPX track:
-        gpx_segment = gpxpy.gpx.GPXTrackSegment()
-        gpx_track.segments.append(gpx_segment)
+        # Create first track in our GPX:
+        gpx_track = gpxpy.gpx.GPXTrack()
+        gpx.tracks.append(gpx_track)
         
-        logger.debug('converting {s} points to XML'.format(s=len(data)))
-    
-        # Add points:
-        gpx_segment.points.extend(data)
+        if isinstance(data[0], gpxpy.gpx.GPXTrackSegment):
+            logger.debug('converting {s} segments to XML'.format(s=len(data)))
+            gpx_track.segments.extend(data)
+            
+        elif isinstance(data[0], gpxpy.gpx.GPXTrackPoint):
+            # Create first segment in our GPX track:
+            gpx_segment = gpxpy.gpx.GPXTrackSegment()
+            gpx_track.segments.append(gpx_segment)
+            
+            logger.debug('converting {s} points to XML'.format(s=len(data)))
+        
+            # Add points:
+            gpx_segment.points.extend(data)
 
     return gpx.to_xml()
+
 
 def get_target(files, target=None):
     logger = logging.getLogger(__name__)
@@ -131,13 +147,16 @@ def save_target(xml, target_file):
         logger.debug('done saving')
 
 
-def merge(files, target=None, segment=False):
+def merge(files, target=None, segment=False, track=False):
     logger = logging.getLogger(__name__)
     logger.info("start new merge process")
     track_files = filter(is_gpx, files)
 
     if segment:
         data = load_segments(track_files)
+
+    elif track:
+        data = load_tracks(track_files)
 
     else:
         data = load_points(track_files)
@@ -153,13 +172,14 @@ def main():
     parser.add_argument("input_files", nargs="*", help="Input files to merge")
     parser.add_argument("-o", help="Output file name, path or directory")
     parser.add_argument("-s", default=False, action="store_true", help=("Merge segments"))
+    parser.add_argument("-t", default=False, action="store_true", help=("Merge tracks"))
 
     if len(sys.argv[1:]) == 0:
         parser.print_help()
         parser.exit()
 
     args = parser.parse_args()
-    merge(args.input_files, args.o, args.s)
+    merge(args.input_files, args.o, args.s, args.t)
 
 
 if __name__ == '__main__':
