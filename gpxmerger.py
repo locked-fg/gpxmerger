@@ -89,13 +89,13 @@ def load_points(track_files):
     return points
 
 
-def to_xml(data, name=""):
+def get_gpx(data, name=""):
     logger = logging.getLogger(__name__)
     gpx = gpxpy.gpx.GPX()
     gpx.nsmap.update(nsmap)
     
     if isinstance(data[0], gpxpy.gpx.GPXTrack):
-        logger.debug('converting {s} tracks to XML'.format(s=len(data)))
+        logger.debug('Generating GPX with {s} tracks'.format(s=len(data)))
         gpx.tracks.extend(data)
         
     else:
@@ -104,7 +104,7 @@ def to_xml(data, name=""):
         gpx.tracks.append(gpx_track)
         
         if isinstance(data[0], gpxpy.gpx.GPXTrackSegment):
-            logger.debug('converting {s} segments to XML'.format(s=len(data)))
+            logger.debug('Generating GPX with {s} segments'.format(s=len(data)))
             gpx_track.segments.extend(data)
             
         elif isinstance(data[0], gpxpy.gpx.GPXTrackPoint):
@@ -112,12 +112,20 @@ def to_xml(data, name=""):
             gpx_segment = gpxpy.gpx.GPXTrackSegment()
             gpx_track.segments.append(gpx_segment)
             
-            logger.debug('converting {s} points to XML'.format(s=len(data)))
+            logger.debug('Generating GPX with {s} points'.format(s=len(data)))
         
             # Add points:
             gpx_segment.points.extend(data)
 
-    return gpx.to_xml()
+    return gpx
+
+
+def save(gpx, target_file):
+    with open(target_file, 'w') as fp:
+        logger = logging.getLogger(__name__)
+        logger.debug('Saving "{f}"'.format(f=target_file))
+        fp.write(gpx.to_xml())
+        logger.debug('Done saving')
 
 
 def get_target(files, target=None):
@@ -146,14 +154,6 @@ def get_name(target):
     return path.splitext(path.basename(target))[0]
 
 
-def save_target(xml, target_file):
-    logger = logging.getLogger(__name__)
-    with open(target_file, 'w') as fp:
-        logger.debug('saving "{f}"'.format(f=target_file))
-        fp.write(xml)
-        logger.debug('done saving')
-
-
 def merge(files, target=None, segment=False, track=False):
     logger = logging.getLogger(__name__)
     logger.info("start new merge process")
@@ -170,8 +170,8 @@ def merge(files, target=None, segment=False, track=False):
 
     target_file = get_target(files, target)
     name = get_name(target_file)
-    xml = to_xml(data, name)
-    save_target(xml, target_file)
+    gpx = get_gpx(data, name)
+    save(gpx, target_file)
     logger.info("Finish")
 
 
