@@ -47,19 +47,26 @@ def is_gpx(filename):
     logger.debug('checking {f}'.format(f=filename))
     return ext == '.gpx'
 
-
-def load_tracks(track_files):
+def load_gpxs(track_files):
     logger = logging.getLogger(__name__)
-    tracks = []
+    gpxs = []
 
     for track_file in track_files:
         with open(track_file, 'r') as gpx_file:
             gpx_parser = parser.GPXParser(gpx_file)
             gpx_parser.parse()
             gpx = gpx_parser.gpx
-            tracks.extend(gpx.tracks)
+            gpxs.append(gpx)
             nsmap.update(gpx.nsmap)
 
+    logger.debug('loaded a total of {s} files'.format(s=len(gpxs)))
+    return gpxs
+
+
+def load_tracks(track_files):
+    logger = logging.getLogger(__name__)
+    gpxs = load_gpxs(track_files)
+    tracks = sum((gpx.tracks for gpx in gpxs), [])
     logger.debug('loaded a total of {s} tracks'.format(s=len(tracks)))
     return tracks
 
