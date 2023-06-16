@@ -7,6 +7,7 @@ import gpxpy.parser as parser
 from os import path
 
 nsmap = {}
+ext = ".gpx"
 
 # https://fangpenlin.com/posts/2012/08/26/good-logging-practice-in-python/
 logging.basicConfig(level=logging.DEBUG)
@@ -42,10 +43,9 @@ logging.config.dictConfig({
 
 def is_gpx(filename):
     logger = logging.getLogger(__name__)
-    ext = path.splitext(filename)[1]
+    logger.debug('Checking {f}'.format(f=filename))
+    return path.splitext(filename)[1] == ext
 
-    logger.debug('checking {f}'.format(f=filename))
-    return ext == '.gpx'
 
 def load_gpxs(track_files):
     logger = logging.getLogger(__name__)
@@ -143,8 +143,8 @@ def get_target(files, target=None):
 
         target = path.join(dirname, filename)
 
-    if not target.endswith(".gpx"):
-        target += ".gpx"
+    if not target.endswith(ext):
+        target += ext
 
     logger.debug("write result to: {f}".format(f=target))
     return target
