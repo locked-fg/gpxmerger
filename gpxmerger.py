@@ -59,7 +59,7 @@ def load_gpxs(track_files):
             gpxs.append(gpx)
             nsmap.update(gpx.nsmap)
 
-    logger.debug('loaded a total of {s} files'.format(s=len(gpxs)))
+    logger.debug('Loaded a total of {s} files'.format(s=len(gpxs)))
     return gpxs
 
 
@@ -67,7 +67,7 @@ def load_tracks(track_files):
     logger = logging.getLogger(__name__)
     gpxs = load_gpxs(track_files)
     tracks = sum((gpx.tracks for gpx in gpxs), [])
-    logger.debug('loaded a total of {s} tracks'.format(s=len(tracks)))
+    logger.debug('Loaded a total of {s} tracks'.format(s=len(tracks)))
     return tracks
 
 
@@ -75,7 +75,7 @@ def load_segments(track_files):
     logger = logging.getLogger(__name__)
     tracks = load_tracks(track_files)
     segments = sum((track.segments for track in tracks), [])
-    logger.debug('loaded a total of {s} segments'.format(s=len(segments)))
+    logger.debug('Loaded a total of {s} segments'.format(s=len(segments)))
     return segments
 
 
@@ -85,7 +85,7 @@ def load_points(track_files):
     points = sum((segment.points for segment in segments), [])
     points = list(filter(lambda x: x.time is not None, points))
     points = sorted(points, key=lambda p: p.time)
-    logger.debug('loaded a total of {s} points'.format(s=len(points)))
+    logger.debug('Loaded a total of {s} points'.format(s=len(points)))
     return points
 
 
@@ -146,7 +146,7 @@ def get_target(files, target=None):
     if not target.endswith(ext):
         target += ext
 
-    logger.debug("write result to: {f}".format(f=target))
+    logger.debug("Write result to: {f}".format(f=target))
     return target
 
 
@@ -156,7 +156,7 @@ def get_name(target):
 
 def merge(files, target=None, segment=False, track=False):
     logger = logging.getLogger(__name__)
-    logger.info("start new merge process")
+    logger.info("Start new merge process")
     track_files = filter(is_gpx, files)
 
     if segment:
@@ -177,10 +177,10 @@ def merge(files, target=None, segment=False, track=False):
 
 def main():
     parser = argparse.ArgumentParser(description="A simple script to merge multiple GPX files into one large GPX file.")
-    parser.add_argument("input_files", nargs="*", help="Input files to merge")
-    parser.add_argument("-o", help="Output file name, path or directory")
-    parser.add_argument("-s", default=False, action="store_true", help=("Merge segments"))
-    parser.add_argument("-t", default=False, action="store_true", help=("Merge tracks"))
+    parser.add_argument("input_files", nargs="*", help="input files to merge")
+    parser.add_argument("-o", help="output file name, path or directory")
+    parser.add_argument("-s", default=False, action="store_true", help=("merge segments"))
+    parser.add_argument("-t", default=False, action="store_true", help=("merge tracks"))
 
     if len(sys.argv[1:]) == 0:
         parser.print_help()
