@@ -3,7 +3,7 @@ import sys
 import logging
 import logging.config
 import gpxpy
-import gpxpy.parser as parser
+from gpxpy import parse
 from os import path
 
 nsmap = {}
@@ -55,9 +55,7 @@ def load_gpxs(track_files):
 
     for track_file in track_files:
         with open(track_file, "r") as gpx_file:
-            gpx_parser = parser.GPXParser(gpx_file)
-            gpx_parser.parse()
-            gpx = gpx_parser.gpx
+            gpx = parse(gpx_file)
             gpxs.append(gpx)
             nsmap.update(gpx.nsmap)
 
