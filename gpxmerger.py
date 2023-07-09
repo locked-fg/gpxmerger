@@ -43,45 +43,44 @@ logging.config.dictConfig(
 )
 
 
-def is_gpx(filename):
-    logger = logging.getLogger(__name__)
-    logger.debug("Checking {f}".format(f=filename))
-    return path.splitext(filename)[1] == ext
-
-
-def load_gpxs(track_files):
+def load_gpxs(files):
     logger = logging.getLogger(__name__)
     gpxs = []
 
-    for track_file in track_files:
-        with open(track_file, "r") as gpx_file:
-            gpx = parse(gpx_file)
-            gpxs.append(gpx)
-            nsmap.update(gpx.nsmap)
+    for file in files:
+        try:
+            with open(file, "r") as gpx_file:
+                gpx = parse(gpx_file)
+                gpxs.append(gpx)
+                nsmap.update(gpx.nsmap)
+                logger.debug("Loaded {f}".format(f=file))
+
+        except:
+            continue
 
     logger.debug("Loaded a total of {s} files".format(s=len(gpxs)))
     return gpxs
 
 
-def load_tracks(track_files):
+def load_tracks(files):
     logger = logging.getLogger(__name__)
-    gpxs = load_gpxs(track_files)
+    gpxs = load_gpxs(files)
     tracks = sum((gpx.tracks for gpx in gpxs), [])
     logger.debug("Loaded a total of {s} tracks".format(s=len(tracks)))
     return tracks
 
 
-def load_segments(track_files):
+def load_segments(files):
     logger = logging.getLogger(__name__)
-    tracks = load_tracks(track_files)
+    tracks = load_tracks(files)
     segments = sum((track.segments for track in tracks), [])
     logger.debug("Loaded a total of {s} segments".format(s=len(segments)))
     return segments
 
 
-def load_points(track_files):
+def load_points(files):
     logger = logging.getLogger(__name__)
-    segments = load_segments(track_files)
+    segments = load_segments(files)
     points = sum((segment.points for segment in segments), [])
     points = list(filter(lambda x: x.time is not None, points))
     points = sorted(points, key=lambda p: p.time)
@@ -159,16 +158,15 @@ def get_name(target):
 def merge(files, target=None, segment=False, track=False):
     logger = logging.getLogger(__name__)
     logger.info("Start new merge process")
-    track_files = filter(is_gpx, files)
 
     if segment:
-        data = load_segments(track_files)
+        data = load_segments(files)
 
     elif track:
-        data = load_tracks(track_files)
+        data = load_tracks(files)
 
     else:
-        data = load_points(track_files)
+        data = load_points(files)
 
     target_file = get_target(files, target)
     name = get_name(target_file)
