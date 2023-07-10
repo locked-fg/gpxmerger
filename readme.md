@@ -18,3 +18,8 @@ In Windows, create a desktop link / shortcut with:
 - select multiple GPX files and drag & drop them to the link - the ```merged.gpx``` is created next to the selected tracks. 
 
 Logging output is written to Console and into ```gpxmerger.log``` in the directory of the ```gpxmerger.py```.
+
+## Contributors
+<a href="https://github.com/locked-fg/gpxmerger/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=locked-fg/gpxmerger" />
+</a>
