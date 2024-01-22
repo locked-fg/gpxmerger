@@ -121,6 +121,20 @@ def get_gpx(data, name=""):
     return gpx
 
 
+def simplify(gpx, distance=None):
+    if distance != False:
+        logger = logging.getLogger(__name__)
+        logger.debug(
+            "Simplifying points with maximum distance: {s}".format(
+                s=distance or "default"
+            )
+        )
+
+        for track in gpx.tracks:
+            for segment in track.segments:
+                segment.simplify(distance)
+
+
 def save(gpx, target_file):
     with open(target_file, "w") as fp:
         logger = logging.getLogger(__name__)
@@ -155,7 +169,7 @@ def get_name(target):
     return path.splitext(path.basename(target))[0]
 
 
-def merge(files, target=None, segment=False, track=False):
+def merge(files, target=None, segment=False, track=False, distance=False):
     logger = logging.getLogger(__name__)
     logger.info("Start new merge process")
 
@@ -171,6 +185,7 @@ def merge(files, target=None, segment=False, track=False):
     target_file = get_target(files, target)
     name = get_name(target_file)
     gpx = get_gpx(data, name)
+    simplify(gpx, distance)
     save(gpx, target_file)
     logger.info("Finish")
 
@@ -187,13 +202,18 @@ def main():
     parser.add_argument(
         "-t", default=False, action="store_true", help=("merge tracks")
     )
+    parser.add_argument(
+        "-d",
+        default=False,
+        help=("Simplify points with maximum distance"),
+    )
 
     if len(sys.argv[1:]) == 0:
         parser.print_help()
         parser.exit()
 
     args = parser.parse_args()
-    merge(args.input_files, args.o, args.s, args.t)
+    merge(args.input_files, args.o, args.s, args.t, args.d)
 
 
 if __name__ == "__main__":
