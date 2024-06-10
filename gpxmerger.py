@@ -43,26 +43,27 @@ logging.config.dictConfig(
 )
 
 
-def load_gpxs(files):
+def load_gpxs(files: list):
     logger = logging.getLogger(__name__)
     gpxs = []
 
     for file in files:
         try:
-            with open(file, "r") as gpx_file:
+            with open(file, mode="r", encoding="utf-8") as gpx_file:
                 gpx = parse(gpx_file)
                 gpxs.append(gpx)
                 nsmap.update(gpx.nsmap)
                 logger.debug("Loaded {f}".format(f=file))
 
-        except:
+        except Exception as e:
+            logger.error(f'Could not load {file}: {e}')
             continue
 
     logger.debug("Loaded a total of {s} files".format(s=len(gpxs)))
     return gpxs
 
 
-def load_tracks(files):
+def load_tracks(files: list):
     logger = logging.getLogger(__name__)
     gpxs = load_gpxs(files)
     tracks = sum((gpx.tracks for gpx in gpxs), [])
@@ -70,7 +71,7 @@ def load_tracks(files):
     return tracks
 
 
-def load_segments(files):
+def load_segments(files: list):
     logger = logging.getLogger(__name__)
     tracks = load_tracks(files)
     segments = sum((track.segments for track in tracks), [])
@@ -78,7 +79,7 @@ def load_segments(files):
     return segments
 
 
-def load_points(files):
+def load_points(files: list):
     logger = logging.getLogger(__name__)
     segments = load_segments(files)
     points = sum((segment.points for segment in segments), [])
@@ -168,10 +169,9 @@ def get_target(files, target=None):
 def get_name(target):
     return path.splitext(path.basename(target))[0]
 
-
-def merge(files, target=None, segment=False, track=False, distance=False):
+def merge(files: list, target=None, segment=False, track=False, distance=False):
     logger = logging.getLogger(__name__)
-    logger.info("Start new merge process")
+    logger.info(f'Start new merge process for {len(files)} files')
 
     if segment:
         data = load_segments(files)
